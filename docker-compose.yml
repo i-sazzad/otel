@@ -1,0 +1,118 @@
+services:
+    # OpenTelemetry Collector
+    otel-collector:
+        image: otel/opentelemetry-collector:latest
+        container_name: otel-collector
+        ports:
+            - "50051:4317"   # OpenTelemetry gRPC endpoint
+            - "50052:4318"  # OpenTelemetry HTTP endpoint
+            - "8889:8889"    # Prometheus scraping endpoint
+        volumes:
+            - ./otel/otel-collector/otel-collector-config.yaml:/etc/otel-collector/otel-collector-config.yaml
+#            - /:/host:ro  # Read-only access to the host filesystem
+#            - ./otel/otel-collector:/var/otel-collector
+        command: ["--config=/etc/otel-collector/otel-collector-config.yaml"]
+        restart: unless-stopped
+        networks:
+            - otel-network
+
+    # Prometheus for metrics collection
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        ports:
+            - "9090:9090" # Prometheus web UI
+        volumes:
+            - ./otel/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        restart: unless-stopped
+        depends_on:
+            - otel-collector
+        networks:
+            - otel-network
+
+    # Tempo for trace visualization
+    tempo:
+        image: grafana/tempo:latest
+        container_name: tempo
+        ports:
+            - "3200:3200" # Tempo HTTP API and UI
+            - "9095:9095" # Tempo gRPC API and UI
+            - "55681:4317" # Tempo OTLP gRPC endpoint (avoiding conflict with otel-collector)
+            - "55682:4318"  # Tempo OTLP HTTP endpoint (avoiding conflict with otel-collector)
+        volumes:
+            - ./otel/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml  # Ensure the tempo config is loaded
+#            - ./otel/tempo:/var/tempo  # Bind local storage for trace data
+        command: ["--config.file=/etc/tempo/tempo-config.yaml"]
+        restart: unless-stopped
+        networks:
+            - otel-network
+
+    # Jaeger for trace visualization
+    jaeger:
+        image: jaegertracing/all-in-one:1.54
+        container_name: jaeger
+        ports:
+            - "16686:16686"   # UI
+            - "14268:14268"   # HTTP thrift port
+            - "55683:4317"   # Jaeger OTLP gRPC endpoint (avoiding conflict with otel-collector)
+            - "55684:4318"   # Jaeger OTLP HTTP endpoint (avoiding conflict with otel-collector)
+        environment:
+            - COLLECTOR_OTLP_ENABLED=true
+            - PROMETHEUS_SERVER_URL=http://prometheus:9090   # Enable metrics scraping in Jaeger
+        restart: unless-stopped
+        networks:
+            - otel-network
+
+    # Loki for log storage and visualization
+    loki:
+        image: grafana/loki:latest
+        container_name: loki
+        ports:
+            - "3100:3100" # Loki web UI
+        volumes:
+            - ./otel/loki/local-config.yaml:/etc/loki/local-config.yaml
+#            - ./otel/loki:/var/loki
+        command: ["--config.file=/etc/loki/local-config.yaml", "--config.expand-env=true"]
+        restart: unless-stopped
+        networks:
+            - otel-network
+
+    # Promtail for log send with loki
+    promtail:
+        image: grafana/promtail:latest
+        container_name: promtail
+        ports:
+            - "9080:9080" # Loki web UI
+        volumes:
+            - ./otel/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+            - /var/log:/var/log
+            - /laravel_app/path/storage/logs:/var/log/laravel_app
+        command: ["--config.file=/etc/promtail/promtail-config.yaml"]
+        restart: unless-stopped
+        networks:
+            - otel-network
+
+    # Grafana for visualization
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana
+        ports:
+            - "3000:3000" # Grafana web UI
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        volumes:
+            - ./otel/grafana:/var/lib/grafana
+        restart: unless-stopped
+        depends_on:
+            - otel-collector
+            - prometheus
+            - jaeger
+            - tempo
+            - loki
+        networks:
+            - otel-network
+
+networks:
+    otel-network:
+        driver: bridge

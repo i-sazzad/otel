@@ -1,0 +1,23 @@
+server:
+  http_listen_port: 9080  # Port for Promtail HTTP server
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # URL of the Loki instance to send logs
+
+positions:
+  filename: /tmp/positions.yaml  # File to track the positions of logs being processed
+
+scrape_configs:
+  - job_name: 'system'  # Job name for scraping system logs
+    static_configs:
+      - targets: ['localhost']  # Scraping logs from localhost
+        labels:
+          job: 'system'  # Job label for identifying the logs in Loki
+          __path__: /var/log/*.log  # System logs path (adjust based on your system)
+
+  - job_name: 'laravel_app'  # Job name for scraping application logs
+    static_configs:
+      - targets: ['laravel_app_id:port']  # Use this if you're running Docker on Mac/Windows
+        labels:
+          job: 'laravel_app'  # Job label for identifying application logs in Loki
+          __path__: /var/log/laravel_app/*.log  # Adjusted path to Laravel logs (inside Promtail container)
