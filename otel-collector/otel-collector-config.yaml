@@ -47,7 +47,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, memory_limiter]
-      exporters: [otlp, otlp/jaeger, zipkin, debug]  # Sends traces to Tempo (via OTLP), jaeger, Zipkin, and debug
+      exporters: [otlp, otlp/jaeger, debug]  # Sends traces to Tempo (via OTLP), jaeger, Zipkin, and debug
     logs:
       receivers: [otlp]
       processors: [batch]
