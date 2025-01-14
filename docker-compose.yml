@@ -39,7 +39,7 @@ services:
             - "55681:4317" # Tempo OTLP gRPC endpoint (avoiding conflict with otel-collector)
             - "55682:4318"  # Tempo OTLP HTTP endpoint (avoiding conflict with otel-collector)
         volumes:
-            - ./otel/tempo:/etc/tempo  # Bind local storage for trace data
+            - ./otel/tempo:/etc/tempo
         command: ["--config.file=/etc/tempo/tempo-config.yaml"]
         restart: unless-stopped
         networks:
