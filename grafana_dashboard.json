@@ -23,7 +23,6 @@
     "panels": [
         {
             "datasource": {
-                "type": "prometheus",
                 "uid": "ae6o3w0ne4oowf"
             },
             "fieldConfig": {
@@ -38,7 +37,7 @@
                         "axisLabel": "",
                         "axisPlacement": "auto",
                         "barAlignment": 0,
-                        "barWidthFactor": 0.6,
+                        "barWidthFactor": 0.5,
                         "drawStyle": "bars",
                         "fillOpacity": 0,
                         "gradientMode": "none",
@@ -64,9 +63,10 @@
                             "mode": "off"
                         }
                     },
+                    "fieldMinMax": false,
                     "mappings": [],
                     "thresholds": {
-                        "mode": "percentage",
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
@@ -87,7 +87,7 @@
                             "options": {
                                 "mode": "exclude",
                                 "names": [
-                                    "{__name__=\"http_request_count_Counts_HTTP_requests_total\", exported_instance=\"sdg201\", exported_job=\"sdg_tracker/sdg_app\", instance=\"otel-collector:8889\", job=\"otel-collector\", method=\"GET\", route=\"/\"}"
+                                    "{method=\"GET\", route=\"/\"}"
                                 ],
                                 "prefix": "All except:",
                                 "readOnly": true
@@ -116,8 +116,8 @@
             "options": {
                 "legend": {
                     "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
+                    "displayMode": "table",
+                    "placement": "right",
                     "showLegend": true
                 },
                 "tooltip": {
@@ -128,19 +128,14 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "ae6o3w0ne4oowf"
-                    },
                     "editorMode": "code",
-                    "expr": "http_request_count_Counts_HTTP_requests_total{}",
-                    "instant": true,
+                    "expr": "sum by (method, route) (http_request_count_Counts_HTTP_requests_total{exported_job=\"sdg_prod/sdg_app_prod\"})",
                     "legendFormat": "__auto",
                     "range": true,
                     "refId": "A"
                 }
             ],
-            "title": "http_request_count",
+            "title": "Total HTTP Request Per Route/Method",
             "type": "timeseries"
         },
         {
@@ -201,7 +196,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "{exported_instance=\"sdg\", exported_job=\"sdg_prod/sdg_app_prod\", instance=\"otel-collector:8889\", job=\"otel-collector\", method=\"GET\", route=\"/\"}"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -229,38 +249,50 @@
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "http_request_latency_Records_HTTP_request_latency_count{}",
+                    "expr": "rate(http_request_latency_Records_HTTP_request_latency_count{exported_job=\"sdg_prod/sdg_app_prod\"}[1h])",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
                     "instant": true,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "http_request_latency_Records_HTTP_request_latency_bucket{}",
+                    "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_latency_Records_HTTP_request_latency_bucket{exported_job=\"sdg_prod/sdg_app_prod\"}[12h])))",
+                    "fullMetaSearch": false,
                     "hide": false,
+                    "includeNullMetadata": false,
                     "instant": false,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "B"
+                    "refId": "B",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "http_request_latency_Records_HTTP_request_latency_sum{}",
+                    "expr": "rate(http_request_latency_Records_HTTP_request_latency_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[5m]) \n/\nrate(http_request_latency_Records_HTTP_request_latency_count{exported_job=\"sdg_prod/sdg_app_prod\"}[5m])",
+                    "fullMetaSearch": false,
                     "hide": false,
+                    "includeNullMetadata": true,
                     "instant": false,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "C"
+                    "refId": "C",
+                    "useBackend": false
                 }
             ],
             "title": "http_request_latency",
@@ -324,7 +356,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "{exported_instance=\"sdg\", exported_job=\"sdg_prod/sdg_app_prod\", instance=\"otel-collector:8889\", job=\"otel-collector\", method=\"GET\"}"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -348,11 +405,15 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_count{}",
+                    "expr": "rate(http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[12h])\n/\nrate(http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}[12h])",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
@@ -360,7 +421,7 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_bucket{}",
+                    "expr": "sum by (le) (rate(http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_bucket{exported_job=\"sdg_prod/sdg_app_prod\"}[12h]))",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "__auto",
@@ -373,7 +434,7 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_sum{}",
+                    "expr": "rate(http_request_size_bytes_Tracks_HTTP_request_sizes_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[12h])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "__auto",
@@ -560,7 +621,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "200"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -589,14 +675,14 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "http_status_code_count_Counts_HTTP_responses_by_status_code_total{}",
+                    "expr": "sum by (status_code) (http_status_code_count_Counts_HTTP_responses_by_status_code_total{})",
                     "instant": true,
                     "legendFormat": "__auto",
                     "range": true,
                     "refId": "A"
                 }
             ],
-            "title": "http_status_code_count",
+            "title": "Total HTTP Request by Code",
             "type": "timeseries"
         },
         {
@@ -607,40 +693,7 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisBorderShow": false,
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "barWidthFactor": 0.6,
-                        "drawStyle": "bars",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        },
-                        "insertNulls": false,
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
+                        "mode": "thresholds"
                     },
                     "mappings": [],
                     "thresholds": {
@@ -667,16 +720,19 @@
             },
             "id": 18,
             "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
                 },
-                "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
-                }
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
             },
             "pluginVersion": "11.4.0",
             "targets": [
@@ -685,16 +741,20 @@
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "system_cpu_time_seconds_Tracks_CPU_time_spent_by_state_and_CPU_total{}",
+                    "expr": "sum by(state) (rate(system_cpu_time_seconds_Tracks_CPU_time_spent_by_state_and_CPU_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) / 3600",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
                     "instant": true,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 }
             ],
-            "title": "system_cpu_time_seconds_total",
-            "type": "timeseries"
+            "title": "Total CPU Usage 24 Hrs (Hour)",
+            "type": "gauge"
         },
         {
             "datasource": {
@@ -754,7 +814,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "used"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -778,14 +863,18 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "system_memory_usage_bytes_Reports_memory_usage_by_state{}",
+                    "expr": "sum by(state) (system_memory_usage_bytes_Reports_memory_usage_by_state{exported_job=\"sdg_prod/sdg_app_prod\"}) / (1024 * 1024 * 1024)",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 }
             ],
-            "title": "system_memory_usage_bytes",
+            "title": "System Memory Usage (GB)",
             "type": "timeseries"
         },
         {
@@ -846,7 +935,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "Avg Disk Space (GB/s)"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -870,11 +984,15 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "system_disk_usage_bytes_Records_available_disk_space_in_bytes_count{}",
-                    "legendFormat": "__auto",
+                    "expr": "(rate(system_disk_usage_bytes_Records_available_disk_space_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]) \n/ \nsystem_disk_usage_bytes_Records_available_disk_space_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}) \n/ 1024 / 1024 / 1024",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "legendFormat": "Avg Disk Space (GB/s)",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
@@ -882,10 +1000,10 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "system_disk_usage_bytes_Records_available_disk_space_in_bytes_bucket{}",
+                    "expr": "rate(system_disk_usage_bytes_Records_available_disk_space_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]) \n/ 1024 / 1024 / 1024",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Total Disk Space (GB/s)",
                     "range": true,
                     "refId": "B"
                 },
@@ -895,15 +1013,15 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "system_disk_usage_bytes_Records_available_disk_space_in_bytes_sum{}",
+                    "expr": "histogram_quantile(0.90, sum(rate(system_disk_usage_bytes_Records_available_disk_space_in_bytes_bucket{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (le)) \n/ 1024 / 1024 / 1024",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "90th Percentile Disk Space (GB)",
                     "range": true,
                     "refId": "C"
                 }
             ],
-            "title": "system_disk_usage_bytes",
+            "title": "System Disk Usage 24 Hrs (GB)",
             "type": "timeseries"
         },
         {
@@ -988,14 +1106,18 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "active_network_connections_Counts_active_network_connections{}",
+                    "expr": "sum by(state) (active_network_connections_Counts_active_network_connections{exported_job=\"sdg_prod/sdg_app_prod\"})",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
                     "legendFormat": "__auto",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
                 }
             ],
-            "title": "system_network_connections",
+            "title": "System Network Connections by State",
             "type": "timeseries"
         },
         {
@@ -1056,7 +1178,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "Receive - Traffic (MB/s)"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -1080,14 +1227,35 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "system_network_io_bytes_Tracks_network_IO_in_bytes_total{}",
-                    "legendFormat": "__auto",
+                    "expr": "rate(system_network_io_bytes_Tracks_network_IO_in_bytes_total{direction=\"receive\", exported_job=\"sdg_prod/sdg_app_prod\"}[24h]) / (1024 * 1024)",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "legendFormat": "Receive - Traffic (MB/s)",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "disableTextWrap": false,
+                    "editorMode": "code",
+                    "expr": "rate(system_network_io_bytes_Tracks_network_IO_in_bytes_total{direction=\"transmit\", exported_job=\"sdg_prod/sdg_app_prod\"}[24h]) / (1024 * 1024)",
+                    "fullMetaSearch": false,
+                    "hide": false,
+                    "includeNullMetadata": true,
+                    "instant": false,
+                    "legendFormat": "Transmit - Traffic (MB/s)",
+                    "range": true,
+                    "refId": "B",
+                    "useBackend": false
                 }
             ],
-            "title": "system_network_io_bytes_total",
+            "title": "System Network I/O Traffic 24 Hrs (MB/s)",
             "type": "timeseries"
         },
         {
@@ -1173,13 +1341,26 @@
             "targets": [
                 {
                     "editorMode": "code",
-                    "expr": "system_network_packets_Tracks_total_network_packets_sent_per_received_total{}",
-                    "legendFormat": "__auto",
+                    "expr": "rate(system_network_packets_Tracks_total_network_packets_sent_per_received_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])",
+                    "legendFormat": "Total Packets",
                     "range": true,
                     "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by (direction) (\n  rate(system_network_packets_Tracks_total_network_packets_sent_per_received_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])\n)",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "{{direction}} Packets",
+                    "range": true,
+                    "refId": "B"
                 }
             ],
-            "title": "system_network_packets_total",
+            "title": "System Networks 24 Hrs (Packets)",
             "type": "timeseries"
         },
         {
@@ -1264,11 +1445,32 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "network_inbound_bytes_Records_inbound_network_traffic_in_bytes_count{}",
-                    "legendFormat": "__auto",
+                    "expr": "sum(increase(network_inbound_bytes_Records_inbound_network_traffic_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance) / (1024 * 1024)",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "legendFormat": "Inbound Traffic",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "disableTextWrap": false,
+                    "editorMode": "code",
+                    "expr": "sum(increase(network_outbound_bytes_Records_outbound_network_traffic_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance) / (1024 * 1024)",
+                    "fullMetaSearch": false,
+                    "hide": false,
+                    "includeNullMetadata": true,
+                    "instant": false,
+                    "legendFormat": "Outbound Traffic",
+                    "range": true,
+                    "refId": "B",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
@@ -1276,15 +1478,15 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "network_outbound_bytes_Records_outbound_network_traffic_in_bytes_count{}",
+                    "expr": "(\n  sum(increase(network_inbound_bytes_Records_inbound_network_traffic_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n  +\n  sum(increase(network_outbound_bytes_Records_outbound_network_traffic_in_bytes_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n) / (1024 * 1024)",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Inbound + Outbound",
                     "range": true,
-                    "refId": "B"
+                    "refId": "C"
                 }
             ],
-            "title": "network_inbound_outbound_traffic_in_bytes_count",
+            "title": "Total Network Traffic Count 24 Hrs (MB)",
             "type": "timeseries"
         },
         {
@@ -1370,8 +1572,8 @@
             "targets": [
                 {
                     "editorMode": "code",
-                    "expr": "network_inbound_bytes_Records_inbound_network_traffic_in_bytes_bucket{}",
-                    "legendFormat": "__auto",
+                    "expr": "sum(rate(network_inbound_bytes_Records_inbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance) / (1024 * 1024)",
+                    "legendFormat": "Inbound Traffic",
                     "range": true,
                     "refId": "A"
                 },
@@ -1381,10 +1583,10 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "network_inbound_bytes_Records_inbound_network_traffic_in_bytes_sum{}",
+                    "expr": "sum(rate(network_outbound_bytes_Records_outbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance) / (1024 * 1024)",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Outbound Traffic",
                     "range": true,
                     "refId": "B"
                 },
@@ -1393,13 +1595,17 @@
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "network_outbound_bytes_Records_outbound_network_traffic_in_bytes_bucket{}",
+                    "expr": "(\n  sum(rate(network_inbound_bytes_Records_inbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n  +\n  sum(rate(network_outbound_bytes_Records_outbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n) / (1024 * 1024)",
+                    "fullMetaSearch": false,
                     "hide": false,
+                    "includeNullMetadata": true,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Total Traffic (Inbound + Outbound)",
                     "range": true,
-                    "refId": "C"
+                    "refId": "C",
+                    "useBackend": false
                 },
                 {
                     "datasource": {
@@ -1407,15 +1613,15 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "network_outbound_bytes_Records_outbound_network_traffic_in_bytes_sum{}",
+                    "expr": "(\n  sum(rate(network_outbound_bytes_Records_outbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n  -\n  sum(rate(network_inbound_bytes_Records_inbound_network_traffic_in_bytes_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (instance)\n) / (1024 * 1024)",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Net Traffic (Outbound - Inbound)",
                     "range": true,
                     "refId": "D"
                 }
             ],
-            "title": "network_inbound_outbound_network_traffic_in_bytes",
+            "title": "Inbound/Outbound Network Traffic 24 Hrs (MB)",
             "type": "timeseries"
         },
         {
@@ -1500,9 +1706,9 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
-                    "editorMode": "code",
-                    "expr": "system_network_errors_Tracks_network_errors_by_direction_total{}",
-                    "legendFormat": "__auto",
+                    "editorMode": "builder",
+                    "expr": "sum(rate(system_network_errors_Tracks_network_errors_by_direction_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (direction, instance)",
+                    "legendFormat": "Errors",
                     "range": true,
                     "refId": "A"
                 },
@@ -1512,15 +1718,15 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "system_network_dropped_Tracks_dropped_network_packets_total{}",
+                    "expr": "sum(rate(system_network_dropped_Tracks_dropped_network_packets_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) by (direction, instance)",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Packets Dropped",
                     "range": true,
                     "refId": "B"
                 }
             ],
-            "title": "system_network_error_dropped_total",
+            "title": "System Network Error & Dropped 24 Hrs",
             "type": "timeseries"
         },
         {
@@ -1606,8 +1812,8 @@
             "targets": [
                 {
                     "disableTextWrap": false,
-                    "editorMode": "builder",
-                    "expr": "scrape_duration_seconds{instance=~\"otel-collector:8889|192.168.30.201:8080\", job=~\"otel-collector|sdg-app\"}",
+                    "editorMode": "code",
+                    "expr": "rate(scrape_duration_seconds{job=\"otel-collector\"}[24h])",
                     "fullMetaSearch": false,
                     "includeNullMetadata": true,
                     "legendFormat": "__auto",
@@ -1616,7 +1822,7 @@
                     "useBackend": false
                 }
             ],
-            "title": "prometheus_scape_duration_sec",
+            "title": "Scape Duration Rate (Sec)",
             "type": "timeseries"
         },
         {
@@ -1711,7 +1917,7 @@
                     "service": "sdg_app"
                 }
             ],
-            "title": "jaeger_app_tracing",
+            "title": "Jaeger App Tracing Duration (Sec)",
             "type": "timeseries"
         },
         {
@@ -1779,7 +1985,7 @@
                     "service": "sdg_app"
                 }
             ],
-            "title": "jaeger_app_trace",
+            "title": "Jaeger App Trace",
             "type": "table"
         },
         {
@@ -1862,7 +2068,7 @@
                     "tableType": "traces"
                 }
             ],
-            "title": "tempo_app_trace",
+            "title": "Tempo App Trace",
             "type": "table"
         },
         {
@@ -1913,7 +2119,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -1946,14 +2153,44 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "db_query_count_Counts_total_database_queries_total{}",
-                    "legendFormat": "__auto",
+                    "expr": "sum(rate(db_query_count_Counts_total_database_queries_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]))",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "legendFormat": "Query Rate",
                     "range": true,
-                    "refId": "A"
+                    "refId": "A",
+                    "useBackend": false
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum(increase(db_query_count_Counts_total_database_queries_total{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]))",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "Total Queries",
+                    "range": true,
+                    "refId": "B"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "max_over_time(\n  sum(rate(db_query_count_Counts_total_database_queries_total{exported_job=\"sdg_prod/sdg_app_prod\"}[5m]))\n  [24h:]\n)",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "Max Queries",
+                    "range": true,
+                    "refId": "C"
                 }
             ],
-            "title": "database_queries_total",
+            "title": "DB Queries Over Time 24 Hrs (Number)",
             "type": "timeseries"
         },
         {
@@ -2004,7 +2241,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2013,7 +2251,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "Total Execution TIme"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -2038,8 +2301,8 @@
             "targets": [
                 {
                     "editorMode": "code",
-                    "expr": "db_query_latency_Records_database_query_latency_count{}",
-                    "legendFormat": "__auto",
+                    "expr": "sum(rate(db_query_latency_Records_database_query_latency_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]))",
+                    "legendFormat": "Latency Rate",
                     "range": true,
                     "refId": "A"
                 },
@@ -2049,10 +2312,10 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "editorMode": "code",
-                    "expr": "db_query_latency_Records_database_query_latency_bucket{}",
+                    "expr": "sum(rate(db_query_latency_Records_database_query_latency_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[24h])) \n/ \nsum(rate(db_query_latency_Records_database_query_latency_count{exported_job=\"sdg_prod/sdg_app_prod\"}[24h]))",
                     "hide": false,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Avg Latency",
                     "range": true,
                     "refId": "B"
                 },
@@ -2061,16 +2324,20 @@
                         "type": "prometheus",
                         "uid": "ae6o3w0ne4oowf"
                     },
+                    "disableTextWrap": false,
                     "editorMode": "code",
-                    "expr": "db_query_latency_Records_database_query_latency_sum{}",
+                    "expr": "sum(increase(db_query_latency_Records_database_query_latency_sum{exported_job=\"sdg_prod/sdg_app_prod\"}[1h]))",
+                    "fullMetaSearch": false,
                     "hide": false,
+                    "includeNullMetadata": true,
                     "instant": false,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Total Execution TIme",
                     "range": true,
-                    "refId": "C"
+                    "refId": "C",
+                    "useBackend": false
                 }
             ],
-            "title": "database_query_latency",
+            "title": "Database Query Latency 24 Hrs (Sec)",
             "type": "timeseries"
         },
         {
@@ -2121,7 +2388,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2130,7 +2398,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "Total Logs"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -2158,13 +2451,14 @@
                         "type": "loki",
                         "uid": "ae6o3zbbuyg3ke"
                     },
-                    "editorMode": "code",
+                    "editorMode": "builder",
                     "expr": "sum(count_over_time({service_name=\"sdg_app\"} [24h]))",
+                    "legendFormat": "Total Logs",
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "loki_log_count",
+            "title": "Loki Application Log Count",
             "type": "timeseries"
         },
         {
@@ -2186,7 +2480,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2229,7 +2524,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "loki_application_log",
+            "title": "Loki Application Log",
             "transformations": [
                 {
                     "id": "extractFields",
@@ -2286,11 +2581,13 @@
                         "type": "loki",
                         "uid": "ae6o3zbbuyg3ke"
                     },
-                    "expr": "{service_name=`sdg-app`} | json | logfmt | drop __error__, __error_details__",
+                    "editorMode": "builder",
+                    "expr": "{service_name=\"sdg-app\"} | json | logfmt | drop __error__, __error_details__",
+                    "queryType": "range",
                     "refId": "logs"
                 }
             ],
-            "title": "loki_prom_application_log",
+            "title": "Loki Promtail Application Log",
             "type": "logs"
         },
         {
@@ -2327,13 +2624,13 @@
                         "uid": "ae6o3zbbuyg3ke"
                     },
                     "editorMode": "builder",
-                    "expr": "{filename=~\"/var/log/auth\\\\.log|/var/log/php8\\\\.3-fpm\\\\.log\", job=~\"system\", service_name=~\"system\"} |= ``",
+                    "expr": "{filename=~\"/var/log/auth\\\\.log|/var/log/php8\\\\.3-fpm\\\\.log|/var/log/kern\\\\.log\", service_name=~\"system\"} |= ``",
                     "hide": false,
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "loki_system_log",
+            "title": "Loki Promtail System Log",
             "type": "logs"
         },
         {
@@ -2384,7 +2681,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2393,32 +2691,7 @@
                         ]
                     }
                 },
-                "overrides": [
-                    {
-                        "__systemRef": "hideSeriesFrom",
-                        "matcher": {
-                            "id": "byNames",
-                            "options": {
-                                "mode": "exclude",
-                                "names": [
-                                    "{__name__=\"scrape_samples_post_metric_relabeling\", instance=\"otel-collector:8889\", job=\"otel-collector\"}"
-                                ],
-                                "prefix": "All except:",
-                                "readOnly": true
-                            }
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.hideFrom",
-                                "value": {
-                                    "legend": false,
-                                    "tooltip": false,
-                                    "viz": true
-                                }
-                            }
-                        ]
-                    }
-                ]
+                "overrides": []
             },
             "gridPos": {
                 "h": 8,
@@ -2426,7 +2699,7 @@
                 "x": 0,
                 "y": 96
             },
-            "id": 10,
+            "id": 37,
             "options": {
                 "legend": {
                     "calcs": [],
@@ -2444,16 +2717,16 @@
                 {
                     "disableTextWrap": false,
                     "editorMode": "builder",
-                    "expr": "scrape_samples_post_metric_relabeling{instance=~\"otel-collector:8889|192.168.30.201:8080\", job=~\"otel-collector|sdg-app\"}",
+                    "expr": "target_info{exported_job=\"sdg_prod/sdg_app_prod\"}",
                     "fullMetaSearch": false,
                     "includeNullMetadata": true,
-                    "legendFormat": "__auto",
+                    "legendFormat": "Target Info",
                     "range": true,
                     "refId": "A",
                     "useBackend": false
                 }
             ],
-            "title": "prometheus_scrape_samples_post_metric_relabeling",
+            "title": "Target Info",
             "type": "timeseries"
         },
         {
@@ -2504,7 +2777,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2513,7 +2787,32 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "New Series Rate"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 8,
@@ -2537,18 +2836,33 @@
             "pluginVersion": "11.4.0",
             "targets": [
                 {
-                    "disableTextWrap": false,
-                    "editorMode": "builder",
-                    "expr": "scrape_series_added{instance=~\"otel-collector:8889|192.168.30.201:8080\", job=~\"otel-collector|sdg-app\"}",
-                    "fullMetaSearch": false,
-                    "includeNullMetadata": true,
-                    "legendFormat": "__auto",
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "rate(scrape_series_added{job=\"otel-collector\"}[24h])",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "New Series Rate",
                     "range": true,
-                    "refId": "A",
-                    "useBackend": false
+                    "refId": "B"
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "increase(scrape_series_added{job=\"otel-collector\"}[24h])",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "Total New Series",
+                    "range": true,
+                    "refId": "C"
                 }
             ],
-            "title": "prometheus_scrape_series_added",
+            "title": "Scrape Series Added 24 Hrs (sec)",
             "type": "timeseries"
         },
         {
@@ -2599,7 +2913,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green"
+                                "color": "green",
+                                "value": null
                             },
                             {
                                 "color": "red",
@@ -2616,7 +2931,7 @@
                             "options": {
                                 "mode": "exclude",
                                 "names": [
-                                    "{__name__=\"scrape_samples_scraped\", instance=\"192.168.30.188:8080\", job=\"sdg-app\"}"
+                                    "Relabeling Rate"
                                 ],
                                 "prefix": "All except:",
                                 "readOnly": true
@@ -2641,6 +2956,140 @@
                 "x": 0,
                 "y": 104
             },
+            "id": 10,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "11.4.0",
+            "targets": [
+                {
+                    "disableTextWrap": false,
+                    "editorMode": "code",
+                    "expr": "rate(scrape_samples_post_metric_relabeling{job=\"otel-collector\"}[24h])",
+                    "fullMetaSearch": false,
+                    "includeNullMetadata": true,
+                    "legendFormat": "Relabeling Rate",
+                    "range": true,
+                    "refId": "A",
+                    "useBackend": false
+                },
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "ae6o3w0ne4oowf"
+                    },
+                    "editorMode": "code",
+                    "expr": "increase(scrape_samples_post_metric_relabeling{job=\"otel-collector\"}[24h])",
+                    "hide": false,
+                    "instant": false,
+                    "legendFormat": "Total Relabeling",
+                    "range": true,
+                    "refId": "B"
+                }
+            ],
+            "title": "Scrape Samples Post Metric Relabeling 24 Hrs (Sec)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "ae6o3w0ne4oowf"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "Scrape Up"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hideFrom",
+                                "value": {
+                                    "legend": false,
+                                    "tooltip": false,
+                                    "viz": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 104
+            },
             "id": 1,
             "options": {
                 "legend": {
@@ -2662,37 +3111,37 @@
                         "uid": "ae6o3w0ne4oowf"
                     },
                     "disableTextWrap": false,
-                    "editorMode": "builder",
-                    "expr": "up{instance=~\"otel-collector:8889|192.168.30.201:8080\", job=~\"otel-collector|sdg-app\"}",
+                    "editorMode": "code",
+                    "expr": "up{job=\"otel-collector\"}",
                     "fullMetaSearch": false,
                     "includeNullMetadata": true,
                     "instant": true,
                     "key": "Q-c4cec79f-1b13-4f1e-89c1-7bb1c2e392c4-0",
-                    "legendFormat": "__auto",
+                    "legendFormat": "Scrape Up",
                     "range": true,
                     "refId": "A",
                     "useBackend": false
                 }
             ],
-            "title": "prometheus_scrape_up",
+            "title": "Scrape Up Duration (Sec)",
             "type": "timeseries"
         }
     ],
     "preload": false,
-    "refresh": "30s",
+    "refresh": "1m",
     "schemaVersion": 40,
     "tags": [],
     "templating": {
         "list": []
     },
     "time": {
-        "from": "now-5m",
+        "from": "now-12h",
         "to": "now"
     },
     "timepicker": {},
     "timezone": "browser",
     "title": "Otel-SDG",
     "uid": "ce7665dp8k1dsc",
-    "version": 85,
+    "version": 181,
     "weekStart": ""
 }
