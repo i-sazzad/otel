@@ -2248,7 +2248,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "bhtpa-76fc5d7865-dwfpd - CLOSING"
+                  "otel-76fc5d7865-dwfpd - CLOSING"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
