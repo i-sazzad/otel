@@ -107,7 +107,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(laratel_application_uptime_seconds_sum{service_name=\"service_name\"}[24h]))",
+          "expr": "sum(rate(laratel_application_uptime_seconds_sum{service_name=\"otel_service_name\"}[24h]))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "legendFormat": "__auto",
@@ -224,7 +224,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(laratel_http_request_total{service_name=\"service_name\"})",
+          "expr": "sum(laratel_http_request_total{service_name=\"otel_service_name\"})",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -349,7 +349,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(http_method) (laratel_http_status_code_total{service_name=\"service_name\"})",
+          "expr": "sum by(http_method) (laratel_http_status_code_total{service_name=\"otel_service_name\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -448,7 +448,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(http_method, http_status_code, http_route) (laratel_http_status_code_total{service_name=\"service_name\"})",
+          "expr": "sum by(http_method, http_status_code, http_route) (laratel_http_status_code_total{service_name=\"otel_service_name\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "[{{http_method}}] [{{http_status_code}}] {{http_route}}",
@@ -523,7 +523,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "laratel_http_request_latency_seconds_sum{service_name=\"service_name\"}",
+          "expr": "laratel_http_request_latency_seconds_sum{service_name=\"otel_service_name\"}",
           "legendFormat": "{{http_route}}",
           "range": true,
           "refId": "A"
@@ -622,7 +622,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (http_route) (\n  laratel_http_request_size_bytes_sum{service_name=\"service_name\"}\n)",
+          "expr": "sum by (http_route) (\n  laratel_http_request_size_bytes_sum{service_name=\"otel_service_name\"}\n)",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -750,7 +750,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (http_route) (\n  laratel_http_response_size_bytes_sum{service_name=\"service_name\"}\n)",
+          "expr": "sum by (http_route) (\n  laratel_http_response_size_bytes_sum{service_name=\"otel_service_name\"}\n)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -851,7 +851,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (http_route) (\n  laratel_http_requests_in_progress_sum{service_name=\"service_name\"}\n)",
+          "expr": "sum by (http_route) (\n  laratel_http_requests_in_progress_sum{service_name=\"otel_service_name\"}\n)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -948,7 +948,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "laratel_http_failed_requests_total{service_name=\"service_name\"}",
+          "expr": "laratel_http_failed_requests_total{service_name=\"otel_service_name\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1083,7 +1083,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(laratel_db_query_total{service_name=\"service_name\"})",
+          "expr": "sum(laratel_db_query_total{service_name=\"otel_service_name\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1196,7 +1196,7 @@
         {
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg by(query) (laratel_db_query_latency_seconds_sum{service_name=\"service_name\"})",
+          "expr": "avg by(query) (laratel_db_query_latency_seconds_sum{service_name=\"otel_service_name\"})",
           "format": "table",
           "instant": false,
           "legendFormat": "__auto",
@@ -1354,7 +1354,7 @@
           },
           "queryType": "search",
           "refId": "A",
-          "service": "service_name"
+          "service": "otel_service_name"
         }
       ],
       "title": "Application Trace by Jaeger",
@@ -1429,7 +1429,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(laratel_system_disk_total_bytes_sum{service_name=\"service_name\"})",
+          "expr": "sum(laratel_system_disk_total_bytes_sum{service_name=\"otel_service_name\"})",
           "legendFormat": "Total Disk Space",
           "range": true,
           "refId": "A"
@@ -1440,7 +1440,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(laratel_system_disk_usage_bytes_sum{service_name=\"service_name\"})",
+          "expr": "sum(laratel_system_disk_usage_bytes_sum{service_name=\"otel_service_name\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "Total Disk Usage",
@@ -1453,7 +1453,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(laratel_system_disk_free_bytes_sum{service_name=\"service_name\"})",
+          "expr": "sum(laratel_system_disk_free_bytes_sum{service_name=\"otel_service_name\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "Total Disk Free",
@@ -1577,7 +1577,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (state) (\n  rate(laratel_system_cpu_time_seconds_total{service_name=\"service_name\"}[24h])\n)",
+          "expr": "sum by (state) (\n  rate(laratel_system_cpu_time_seconds_total{service_name=\"otel_service_name\"}[24h])\n)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -1652,7 +1652,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "avg by(type) (laratel_system_memory_usage_bytes_sum{service_name=\"service_name\"})",
+          "expr": "avg by(type) (laratel_system_memory_usage_bytes_sum{service_name=\"otel_service_name\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1763,7 +1763,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "laratel_system_network_io_bytes_total{service_name=\"service_name\"}",
+          "expr": "laratel_system_network_io_bytes_total{service_name=\"otel_service_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1865,7 +1865,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "laratel_network_inbound_bytes_sum{service_name=\"service_name\"}",
+          "expr": "laratel_network_inbound_bytes_sum{service_name=\"otel_service_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1967,7 +1967,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "laratel_network_outbound_bytes_sum{service_name=\"service_name\"}",
+          "expr": "laratel_network_outbound_bytes_sum{service_name=\"otel_service_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2068,7 +2068,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "laratel_system_network_dropped_total{service_name=\"service_name\"}",
+          "expr": "laratel_system_network_dropped_total{service_name=\"otel_service_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2169,7 +2169,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "laratel_system_network_errors_total{service_name=\"service_name\"}",
+          "expr": "laratel_system_network_errors_total{service_name=\"otel_service_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2248,7 +2248,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "otel-76fc5d7865-dwfpd - CLOSING"
+                  "bhtpa-76fc5d7865-dwfpd - CLOSING"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -2286,7 +2286,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "rate(laratel_active_network_connections_sum{service_name=\"service_name\"}[24h])",
+          "expr": "rate(laratel_active_network_connections_sum{service_name=\"otel_service_name\"}[24h])",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
